@@ -1,0 +1,31 @@
+# Local stack: front http://localhost:3000, agentik http://localhost:8080,
+# qdrant dashboard http://localhost:6333/dashboard
+services:
+  front:
+    build:
+      context: front
+      args:
+        PUBLIC_WS_ENDPOINT: ws://localhost:8080/ws_api/v1/chat
+        # From ./.env (gitignored); empty keeps the endpoint config page locked.
+        PUBLIC_WS_CONFIG_PASSWORD_HASH: ${WS_CONFIG_PASSWORD_HASH:-}
+    ports: ["3000:8080"]
+    depends_on: [agentik]
+
+  agentik:
+    build: agentik
+    env_file: agentik/.env
+    environment:
+      QDRANT_ENDPOINT: http://qdrant:6333
+      QDRANT_API_KEY: ""
+      CORS_ORIGINS: '["http://localhost:3000"]'
+    ports: ["8080:8080"]
+    volumes: ["./agentik/data:/data"]  # same dir make dev-agentik uses
+    depends_on: [qdrant]
+
+  qdrant:
+    image: qdrant/qdrant:v1.20.2-unprivileged
+    ports: ["6333:6333"]
+    volumes: ["qdrant:/qdrant/storage"]
+
+volumes:
+  qdrant:

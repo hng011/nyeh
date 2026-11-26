@@ -1,0 +1,24 @@
+name: Deploy front
+
+on:
+  push:
+    branches: [main]
+    paths: [front/**, .github/workflows/deploy-front.yaml]
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      packages: write
+    uses: hng011/nyehrver/.github/workflows/deploy.yaml@main
+    with:
+      name: nyeh-front
+      namespace: nyeh
+      context: front
+      host: hng.kaktus.foo
+      port: 8080
+      tcp_probe: true
+    secrets:
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      BUILD_ARGS: |
+        PUBLIC_WS_CONFIG_PASSWORD_HASH=${{ secrets.WS_CONFIG_PASSWORD_HASH }}

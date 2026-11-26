@@ -1,0 +1,29 @@
+name: Deploy agentik
+
+on:
+  push:
+    branches: [main]
+    paths: [agentik/**, .github/workflows/deploy-agentik.yaml]
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      packages: write
+    uses: hng011/nyehrver/.github/workflows/deploy.yaml@main
+    with:
+      name: nyeh-agentik
+      namespace: nyeh
+      context: agentik
+      port: 8080
+      env_secret: nyeh-agentik-env
+      seal_env: true
+      memory_limit: 512Mi
+      persistence_size: 256Mi
+      tcp_probe: true
+    secrets:
+      SEALED_SECRETS_CERT: ${{ secrets.SEALED_SECRETS_CERT }}
+      INFRA_TOKEN: ${{ secrets.INFRA_TOKEN }}
+      # Whole agentik .env (KEY=value lines); CORS_ORIGINS must allow https://hng.kaktus.foo,
+      # QDRANT_ENDPOINT=http://qdrant.qdrant.svc.cluster.local:80 (port explicit, client defaults to 6333)
+      ENV_FILE: ${{ secrets.AGENTIK_ENV_FILE }}
